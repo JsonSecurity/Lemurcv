@@ -28,7 +28,7 @@ cur="\033[3m"
 sub="\033[4m"
 
 #salidas/entradas
-cent=$R
+cent=$C
 bord=$N
 excr=$W
 eye="\e[38;2;173;255;47m"
@@ -76,35 +76,58 @@ banner() {
 
 
              $autor $script
-
-$info Waiting for images..."""
+"""
 }
 
 help() {
-	echo -e "\n [!] Usage: 
-	$0 -l			# loop mode
-	$0 -d <path>		# dir solve
-	$0 -p <text>		# promt"
+	echo -e "\n [!] Usage:
+	
+ $0 -l		# loop mode
+ $0 -d <path> 	# dir images *
+ $0 -g <text>	# promt gemini
+ $0 -t <text>	# promt tauro *"
 }
 
-solveia() {
-	sleep 1
-	if [[ ! -n $PROMT ]];then
-		echo -e "\n$A Error -p <promt>"
-		exit 1
+verify() {
+	IN_IMG=$DIR
+
+	if [[ ! -d try ]];then
+	    mkdir try
 	fi
 
-	file=$(ls $IN_IMG)
+	if [[ ! -n $PROMT_TAURO ]];then
+        echo -e "\n$A -pt <promt>"
+        exit 1
+    fi
+	
+	if [[ ! -d $IN_IMG ]];then
+	    echo -e "$E Dir not found\n"
+	    exit 1
+	else
+	    LEN_AFTER=$(ls $IN_IMG | wc -l)
+	    echo -e "$T Dir:$info $IN_IMG/"
+	    echo -e "$T Len:$info $LEN_AFTER\n"
+	    echo -e "$info Waiting for images..."
+	fi
+}
+
+lemurcv() {
+	file=$(ls -t $IN_IMG | head -n "-${LEN_AFTER}")
 	#echo -e "file: $file"
 	if [[ -f "$IN_IMG/$file" ]];then
-		echo -e "\n$S Image:$info $IN_IMG/$file"
+		echo -e "\n$S Image:$info $file"
 
-		echo -e "\n$T Tauro-IA"
+		echo -e "\n$T TAURO"
 		#tauro=$(bash tauro-ai.sh -p "Extrae todo el texto de la imagen, tambien la pregunta en ingles, extraelas en orden para luego resolverlos" -i "$IN_IMG/$file" -s)
-		tauro=$(bash tauro-ai.sh -p "Extrae todo el texto de la imagen, tambien la pregunta, extraelas en orden para luego resolverlos" -i "$IN_IMG/$file" -s)
+		#tauro=$(bash tauro-ai.sh -p "Extrae todo el texto de la imagen, tambien la pregunta, extraelas en orden para luego resolverlos" -i "$IN_IMG/$file" -s)
+		tauro=$(bash tauro-ai.sh -p $PROMT_TAURO -i "$IN_IMG/$file" -s)
 		echo $tauro
-		echo -e "\n$T Gemini"
-		bash gemini.sh "$PROMT: $tauro"
+
+		if [[ -n $PROMT_GEMINI ]];then
+			echo -e "\n$T GEMINI"
+			bash gemini.sh "$PROMT_GEMINI: $tauro"
+		fi
+		
 		echo -e "\n$info Waiting for images..."
 	fi
 }
@@ -113,31 +136,29 @@ if [[ ! $1 ]];then
 	help
 	exit 1
 fi
-while getopts h,l,d:,p: arg;do
+while getopts h,l,d:,g,t: arg;do
 	case $arg in
 		h) help;;
 		l) LOOP=true;;
 		d) DIR=$OPTARG;;
-		p) PROMT=$OPTARG;;
+		g) PROMT_GEMINI=$OPTARG;;
+		t) PROMT_TAURO=$OPTARG;;
 		*) help;;
 	esac
 done
 
 banner
+verify
+
 if [[ $LOOP ]];then
-	IN_IMG=$DIR
-	if [[ ! -d $IN_IMG ]];then
-		echo -e "$E Dir not found\n"
-		exit 1
-	fi
 	while true;do
-		solveia
+		lemurcv
 		sleep 2
 
 		if [[ -f "$IN_IMG/$file" ]];then
-			mv "$IN_IMG/$file" lost
+			mv "$IN_IMG/$file" try
 		fi
 	done
 else
-	solveia
+	lemurcv
 fi
