@@ -51,7 +51,7 @@ script="${bol}$bord [$W ${info}Tauro-IA${bord} ]"
 
 
 # Variables globales
-IMG_PATH_2="images/test.png"
+IMG_PATH_2=""
 BASEURL="https://generativelanguage.googleapis.com"
 APIKEY=$(cat .APIKEY 2>/dev/null)
 PROMT=$(cat promt.txt 2>/dev/null)
@@ -163,7 +163,7 @@ response() {
 	    -X POST \
 	    -d "$json_data" > response.json 2> /dev/null
 
-	
+	echo "Json"
 	c="33"
 	b="e[${c}m"
 
@@ -210,9 +210,11 @@ downloadImage() {
 }
 
 verifyOptions() {
+	echo "this $IMG_PATH_2"
+	echo $PROMT
 	if [[ ! -f $IMG_PATH_2 ]];then
 		echo -e "\n$E Image path not found"
-		exit 1
+		IMG_PATH_2=$(cat img.txt)
 	fi
 
 	sleep 1
@@ -261,9 +263,9 @@ fi
 while getopts h,i:,d:,p:,n:,s arg;do
 	case $arg in
 		h) help;;
+		i) IMG_PATH_2=$OPTARG;;
 		p) PROMT=$OPTARG;;
 		n) NAME_IMG=$OPTARG;;
-		i) IMG_PATH_2=$OPTARG;;
 		d) URL_IMG=$OPTARG;downloadImage;;
 		s) SILENT=true;;
 		*) help;;
