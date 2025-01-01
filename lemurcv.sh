@@ -53,6 +53,7 @@ script="${bol}$bord [$W ${info}Lemurcv${bord} ]"
 
 IN_IMG="isolve"
 OUT_IMG="images"
+APIKEY=$(cat .APIKEY 2>/dev/null)
 
 banner() {
 	echo -e """
@@ -79,8 +80,6 @@ banner() {
 """
 }
 
-process=false
-
 help() {
 	echo -e "\n [!] Usage:
 	
@@ -101,6 +100,11 @@ verify() {
 	if [[ ! -n $PROMT_TAURO ]];then
         echo -e "\n$A -t <promt>"
         exit 1
+    fi
+
+    if [[ ! -n $APIKEY ]];then
+    	echo -e "\n$A .APIKEY not found\n"
+    	exit 1
     fi
 	
 	if [[ ! -d $IN_IMG ]];then
@@ -154,21 +158,13 @@ done
 banner
 verify
 
-if [[ $LOOP ]];then
-	while true;do
-		lemurcv
-		sleep 2
-
-		if [[ -f "$IN_IMG/$file" ]];then
-			mv "$IN_IMG/$file" try
-		fi
-	done
-else
-	while true;do
-		lemurcv
-		if [[ -f "$IN_IMG/$file" ]];then
-			mv "$IN_IMG/$file" try
+while true;do
+	lemurcv
+	sleep 2
+	if [[ -f "$IN_IMG/$file" ]];then
+		mv "$IN_IMG/$file" try
+		if [[ ! $LOOP ]];then
 			exit 1
 		fi
-	done
-fi
+	fi
+done
