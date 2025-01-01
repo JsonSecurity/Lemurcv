@@ -163,7 +163,6 @@ response() {
 	    -X POST \
 	    -d "$json_data" > response.json 2> /dev/null
 
-	echo "Json"
 	c="33"
 	b="e[${c}m"
 
@@ -210,8 +209,8 @@ downloadImage() {
 }
 
 verifyOptions() {
-	echo "this $IMG_PATH_2"
-	echo $PROMT
+	#echo "this $IMG_PATH_2"
+	#echo $PROMT
 	if [[ ! -f $IMG_PATH_2 ]];then
 		echo -e "\n$E Image path not found"
 		IMG_PATH_2=$(cat img.txt)

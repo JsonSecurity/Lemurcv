@@ -86,8 +86,9 @@ help() {
 	
  $0 -l		# loop mode
  $0 -d <path> 	# dir images *
- $0 -g <text>	# promt gemini
- $0 -t <text>	# promt tauro *"
+ $0 -g <text>		# promt gemini
+ $0 -t <text>		# promt tauro *
+ "
 }
 
 verify() {
@@ -121,22 +122,17 @@ lemurcv() {
 		echo -e "\n$S Image:$info $file"
 
 		echo -e "\n$T TAURO"
-		#tauro=$(bash tauro-ai.sh -p "Extrae todo el texto de la imagen, tambien la pregunta en ingles, extraelas en orden para luego resolverlos" -i "$IN_IMG/$file" -s)
-		#tauro=$(bash tauro-ai.sh -p "Extrae todo el texto de la imagen, tambien la pregunta, extraelas en orden para luego resolverlos" -i "$IN_IMG/$file" -s)
 
-		#echo "$IN_IMG/$file"
 		img="$IN_IMG/$file"
 		echo $img > img.txt
 
-		bash -c "./tauro-ai.sh -p \"$PROMT_TAURO\" -i $img -s"
-		#echo $cmd
-		#bash -c $cmd
+		tauro=$(bash -c "./tauro-ai.sh -p \"$PROMT_TAURO\" -i $img -s")
 
-		#if [[ -n $PROMT_GEMINI ]];then
+		echo $tauro
+
 		echo -e "\n$T GEMINI"
-		process=true
-		bash gemini.sh "\"$PROMT_GEMINI: $tauro\""
-		#fi
+		prommm="$PROMT_GEMINI: $tauro"
+		bash -c "./gemini.sh \"$prommm\""
 		
 		echo -e "\n$info Waiting for images..."
 	fi
@@ -167,7 +163,6 @@ if [[ $LOOP ]];then
 
 		if [[ -f "$IN_IMG/$file" ]];then
 			mv "$IN_IMG/$file" try
-			#echo "del"
 		fi
 	done
 else

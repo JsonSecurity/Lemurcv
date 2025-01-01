@@ -12,6 +12,7 @@ if [[ ! $1 ]];then
 	echo -e "\n[!] Promt error"
 	exit 1
 fi
+echo $1
 
 curl -sN https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$APIKEY \
  -H 'Content-Type: application/json' \
