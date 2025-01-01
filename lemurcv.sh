@@ -28,10 +28,10 @@ cur="\033[3m"
 sub="\033[4m"
 
 #salidas/entradas
-cent=$C
 bord=$N
 excr=$W
 eye="\e[38;2;173;255;47m"
+cent=$eye
 info=$eye
 hed=$W
 
@@ -99,7 +99,7 @@ verify() {
 	fi
 
 	if [[ ! -n $PROMT_TAURO ]];then
-        echo -e "\n$A -pt <promt>"
+        echo -e "\n$A -t <promt>"
         exit 1
     fi
 	
@@ -122,17 +122,15 @@ lemurcv() {
 		echo -e "\n$S Image:$info $file"
 
 		echo -e "\n$T TAURO"
-
 		img="$IN_IMG/$file"
-		echo $img > img.txt
-
 		tauro=$(bash -c "./tauro-ai.sh -p \"$PROMT_TAURO\" -i $img -s")
-
 		echo $tauro
 
-		echo -e "\n$T GEMINI"
-		prommm="$PROMT_GEMINI: $tauro"
-		bash -c "./gemini.sh \"$prommm\""
+		if [[ -n $PROMT_GEMINI ]];then
+			echo -e "\n$T GEMINI"
+			prommm="$PROMT_GEMINI: $tauro"
+			bash -c "./gemini.sh \"$prommm\""
+		fi
 		
 		echo -e "\n$info Waiting for images..."
 	fi
@@ -142,7 +140,7 @@ if [[ ! $1 ]];then
 	help
 	exit 1
 fi
-while getopts h,l,d:,g,t: arg;do
+while getopts h,l,d:,g:,t: arg;do
 	case $arg in
 		h) help;;
 		l) LOOP=true;;
@@ -166,5 +164,11 @@ if [[ $LOOP ]];then
 		fi
 	done
 else
-	lemurcv
+	while true;do
+		lemurcv
+		if [[ -f "$IN_IMG/$file" ]];then
+			mv "$IN_IMG/$file" try
+			exit 1
+		fi
+	done
 fi
