@@ -12,7 +12,6 @@ if [[ ! $1 ]];then
 	echo -e "\n[!] Promt error"
 	exit 1
 fi
-echo $1
 
 curl -sN https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=$APIKEY \
  -H 'Content-Type: application/json' \
@@ -25,12 +24,12 @@ curl -sN https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:gene
                 \"text\": \"$1\"
                 }
             },
-        }" -o request.txt
+        }" -o data/request.txt
 
 c="33"
 b="e[${c}m"
 
-ver=$(cat request.txt | awk -F"\"text\":" '{print $2}' | tr -d '\n' \
+ver=$(cat data/request.txt | awk -F"\"text\":" '{print $2}' | tr -d '\n' \
 	        | sed 's/^ *"//; s/" *$//' \
 	        | sed 's!\*\*!\\'"$b"'!g' \
 	        | sed 's!'"$c"'m\\n!0m\\n!g' \

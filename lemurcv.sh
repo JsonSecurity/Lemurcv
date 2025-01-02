@@ -93,8 +93,8 @@ help() {
 verify() {
 	IN_IMG=$DIR
 
-	if [[ ! -d try ]];then
-	    mkdir try
+	if [[ ! -d worked ]];then
+	    mkdir worked
 	fi
 
 	if [[ ! -n $PROMT_TAURO ]];then
@@ -125,15 +125,13 @@ lemurcv() {
 	if [[ -f "$IN_IMG/$file" ]];then
 		echo -e "\n$S Image:$info $file"
 
-		echo -e "\n$T TAURO"
-		img="$IN_IMG/$file"
-		tauro=$(bash -c "./tauro-ai.sh -p \"$PROMT_TAURO\" -i $img -s")
+		echo -e "\n$T Tauro-ai:\n"
+		tauro=$(bash -c "./tauro-ai.sh -p \"$PROMT_TAURO\" -i \"$IN_IMG/$file\" -s")
 		echo $tauro
 
 		if [[ -n $PROMT_GEMINI ]];then
-			echo -e "\n$T GEMINI"
-			prommm="$PROMT_GEMINI: $tauro"
-			bash -c "./gemini.sh \"$prommm\""
+			echo -e "\n$T Gemini:\n"
+			bash -c "./gemini.sh \"$PROMT_GEMINI: $tauro\""
 		fi
 		
 		echo -e "\n$info Waiting for images..."
@@ -162,7 +160,7 @@ while true;do
 	lemurcv
 	sleep 2
 	if [[ -f "$IN_IMG/$file" ]];then
-		mv "$IN_IMG/$file" try
+		mv "$IN_IMG/$file" worked
 		if [[ ! $LOOP ]];then
 			exit 1
 		fi

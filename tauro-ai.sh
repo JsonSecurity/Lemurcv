@@ -115,6 +115,10 @@ verify() {
 		sleep .1
 		banner
 	fi
+
+	if [[ ! -d data ]];then
+		mkdir data
+	fi
 }
 
 uploadFile() {
@@ -139,9 +143,9 @@ fileUploads() {
 	  -H "Content-Length: ${NUM_BYTES}" \
 	  -H "X-Goog-Upload-Offset: 0" \
 	  -H "X-Goog-Upload-Command: upload, finalize" \
-	  --data-binary "@${IMG_PATH_2}" 2> /dev/null > file_info.json
+	  --data-binary "@${IMG_PATH_2}" 2> /dev/null > data/file_info.json
 	
-	file_uri=$(jq ".file.uri" file_info.json)
+	file_uri=$(jq ".file.uri" data/file_info.json)
 	#echo $file_uri
 }
 
@@ -161,17 +165,17 @@ response() {
 	curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$APIKEY" \
 	    -H "Content-Type: application/json" \
 	    -X POST \
-	    -d "$json_data" > response.json 2> /dev/null
+	    -d "$json_data" > data/response.json 2> /dev/null
 
 	c="33"
 	b="e[${c}m"
 
 	if [[ $SILENT ]];then
-		text_response=$(jq ".candidates[].content.parts[].text" response.json \
+		text_response=$(jq ".candidates[].content.parts[].text" data/response.json \
 			| sed 's!\\n! !g' | sed 's!*!!g' \
 			| sed 's!"!!g' | sed 's!\\!!g')
 	else
-		text_response=$(jq ".candidates[].content.parts[].text" response.json \
+		text_response=$(jq ".candidates[].content.parts[].text" data/response.json \
 	        | sed 's/^ *"//; s/" *$//' \
 	        | sed 's!\*\*!\\'"$b"'!g' \
 	        | sed 's!'"$c"'m\\n!0m\\n!g' \
@@ -179,7 +183,7 @@ response() {
 	        | sed 's!\\n\*!\\n -!g' \
 	        | sed 's!\\"!"!g')
 	fi
-	echo -e "\n\n$text_response" >> history.txt
+	echo -e "\n\n$text_response" >> data/history.txt
 	echo -e $text_response
 }
 
@@ -209,11 +213,9 @@ downloadImage() {
 }
 
 verifyOptions() {
-	#echo "this $IMG_PATH_2"
-	#echo $PROMT
 	if [[ ! -f $IMG_PATH_2 ]];then
 		echo -e "\n$E Image path not found"
-		IMG_PATH_2=$(cat img.txt)
+		exit 1
 	fi
 
 	sleep 1
@@ -242,10 +244,6 @@ tauroIA() {
 
 	echo -e "\n$T Analyzing...\n"
 	response
-
-	echo -e "$I Show img?\n"
-	read show
-	display $IMG_PATH_2
 }
 
 silentTauroIA() {
@@ -254,6 +252,8 @@ silentTauroIA() {
 	fileUploads
 	response
 }
+
+verify
 
 if [[ ! $1 ]];then
 	help
