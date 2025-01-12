@@ -51,29 +51,27 @@ YN="$bord[${cent}Y${bord}/${cent}N${bord}]${excr}"
 autor="${bol}$bord [$W ${info}Json Security${bord} ]"
 script="${bol}$bord [$W ${info}Lemurcv${bord} ]"
 
-IN_IMG="isolve"
-OUT_IMG="images"
 APIKEY=$(cat .APIKEY 2>/dev/null)
 
 banner() {
-	echo -e """
-                                                        
-        .lo;.                              .'lo'          
-    ...',xNN0dc.                        .:oONWO:'....     
-   'codO0KNMMNk,                        .dXMMWK00xol,.    
-  .:okXWMMMWk,       ..,:c:'.,c:;'.       'dXMMMWXOdc.    
-  .:d0WMMMWd.      ,d0XWMMW0kXMMWNKxc.      cNMMMWKkl'    
-  .;xXMMMMK,       ;lokXWMMMMMMMNOdlc.      .OMMMMNOc.    
-  .:kXWWWMX;      ${eye}.cl:''${hed}dNMMMMWO${eye};.;lc,${hed}      '0MMWWNOl'.   
-  .,:cokOKK;     ${eye}'0NKNO..${hed}kMMMMX${eye};.dNKXX:${hed}     .OX0Odl:;..   
-      ..;Ox.     ${eye}.dKKKo.'${hed}0MMMMN${eye}c.cKKKO,${hed}      o0c...       
-       .lx,       ${eye} .,..,${hed}OWMMMMMX${eye}l..,'.${hed}       .xx.         
-       :Kk.          .dNW0kOOkOXWO,           dNo.        
-       ,OK,         .xWMXo,..':OMMK,         .kK:.        
-       .xWk.        .xWMWWXkd0WWMMK;        .dN0,         
-        'col.        .o0NNXKKXNNKx,        .cdl;.         
-                       .';cccc:,.                         
-                           ...         
+    echo -e """$W
+
+        .lo;.                              .'lo'
+    ...',xNN0dc.                        .:oONWO:'....
+   'codO0KNMMNk,                        .dXMMWK00xol,.
+  .:okXWMMMWk,       ..,:c:'.,c:;'.       'dXMMMWXOdc.
+  .:d0WMMMWd.      ,d0XWMMW0kXMMWNKxc.      cNMMMWKkl'
+  .;xXMMMMK,       ;lokXWMMMMMMMNOdlc.      .OMMMMNOc.
+  .:kXWWWMX;      ${eye}.cl:''${hed}dNMMMMWO${eye};.;lc,${hed}      '0MMWWNOl'.
+  .,:cokOKK;     ${eye}'0NKNO..${hed}kMMMMX${eye};.dNKXX:${hed}     .OX0Odl:;..
+      ..;Ox.     ${eye}.dKKKo.'${hed}0MMMMN${eye}c.cKKKO,${hed}      o0c...
+       .lx,       ${eye} .,..,${hed}OWMMMMMX${eye}l..,'.${hed}       .xx.
+       :Kk.          .dNW0kOOkOXWO,           dNo.
+       ,OK,         .xWMXo,..':OMMK,         .kK:.
+       .xWk.        .xWMWWXkd0WWMMK;        .dN0,
+        'col.        .o0NNXKKXNNKx,        .cdl;.
+                       .';cccc:,.
+                           ...
 
 
              $autor $script
@@ -81,60 +79,66 @@ banner() {
 }
 
 help() {
-	echo -e "\n [!] Usage:
-	
- $0 -l		# loop mode
- $0 -d <path> 	# dir images *
- $0 -g <text>		# promt gemini
- $0 -t <text>		# promt tauro *
+    echo -e "
+[!] Usage:
+
+ $0 -p <text>     # promt opticai *
+ $0 -g <text>     # promt gemini
+
+ $0 -d <path>     # dir images *
+ $0 -l            # loop mode
  "
 }
 
 verify() {
-	IN_IMG=$DIR
-
-	if [[ ! -d worked ]];then
-	    mkdir worked
+	if [[ ! -n $APIKEY ]];then
+		echo -e "\n$E .APIKEY not found\n"
+		exit 1
 	fi
 
-	if [[ ! -n $PROMT_TAURO ]];then
-        echo -e "\n$A -t <promt>"
-        exit 1
-    fi
+	if [[ ! -n $(command -v jq) ]];then
+		echo -e "\n$A Installing jq...\n"
+		pkg install jq -y > /dev/null
+	fi
 
-    if [[ ! -n $APIKEY ]];then
-    	echo -e "\n$A .APIKEY not found\n"
-    	exit 1
-    fi
-	
-	if [[ ! -d $IN_IMG ]];then
-	    echo -e "$E Dir not found\n"
-	    exit 1
+	#if [[ ! -n $G_PROMT ]];then
+	#	echo -e "\n$E -g <promt>\n"
+	#	exit 1
+	#fi
+
+	if [[ ! -n $O_PROMT ]];then
+		echo -e "\n$E -o <promt>\n"
+		exit 1
+	fi
+
+	if [[ ! -d $DIR_IMAGE ]];then
+		echo -e "\n$E -d path not found\n"
+		exit 1
 	else
-	    LEN_AFTER=$(ls $IN_IMG | wc -l)
-	    echo -e "$T Dir:$info $IN_IMG/"
-	    echo -e "$T Len:$info $LEN_AFTER\n"
-	    echo -e "$info Waiting for images..."
+		LEN_DIR=$(ls $DIR_IMAGE | wc -l)
+		echo -e "$T Dir:$eye $DIR_IMAGE"
+		echo -e "$T Len:$eye $LEN_DIR"
+		echo -e "\n${eye} Waiting for images...\n"
+	fi
+
+	if [[ ! -d worker ]];then
+		mkdir worker
 	fi
 }
-
 lemurcv() {
-	file=$(ls -t $IN_IMG | head -n "-${LEN_AFTER}")
-	#echo -e "file: $file"
-	process=false
-	if [[ -f "$IN_IMG/$file" ]];then
-		echo -e "\n$S Image:$info $file"
+	IMG_FILE=$(ls -t $DIR_IMAGE | head -n "-${LEN_DIR}")
+	PATH_IMG="${DIR_IMAGE}/${IMG_FILE}"
+	if [[ -f $PATH_IMG ]];then
+		echo -e "$T Image:$eye $IMG_FILE"
 
-		echo -e "\n$T Tauro-ai:\n"
-		tauro=$(bash -c "./tauro-ai.sh -p \"$PROMT_TAURO\" -i \"$IN_IMG/$file\" -s")
-		echo $tauro
+		echo -e "\n$T OpticAI...\n"
+		opticai=$(bash -c "./opticai.sh -p \"$O_PROMT\" -i \"$PATH_IMG\" -s")
+		echo -e $opticai
 
-		if [[ -n $PROMT_GEMINI ]];then
-			echo -e "\n$T Gemini:\n"
-			bash -c "./gemini.sh \"$PROMT_GEMINI: $tauro\""
+		if [[ -n $G_PROMT ]];then
+			echo -e "\n$T Gemini...\n"
+			bash -c "./gemini.sh \"$G_PROMT: $opticai\""
 		fi
-		
-		echo -e "\n$info Waiting for images..."
 	fi
 }
 
@@ -142,27 +146,28 @@ if [[ ! $1 ]];then
 	help
 	exit 1
 fi
-while getopts h,l,d:,g:,t: arg;do
+while getopts h,l,d:,g:,p: arg;do
 	case $arg in
 		h) help;;
-		l) LOOP=true;;
-		d) DIR=$OPTARG;;
-		g) PROMT_GEMINI=$OPTARG;;
-		t) PROMT_TAURO=$OPTARG;;
-		*) help;;
+		l) LOOP_MODE=true;;
+		d) DIR_IMAGE=$OPTARG;;
+		g) G_PROMT=$OPTARG;;
+		p) O_PROMT=$OPTARG;;
 	esac
 done
 
 banner
 verify
-
 while true;do
 	lemurcv
-	sleep 2
-	if [[ -f "$IN_IMG/$file" ]];then
-		mv "$IN_IMG/$file" worked
-		if [[ ! $LOOP ]];then
-			exit 1
+
+	if [[ -f $PATH_IMG ]];then
+		mv $PATH_IMG worker
+		if [[ ! $LOOP_MODE ]];then
+			exit 0
+		else
+			echo -e "\n${eye}Waiting for images...\n"
 		fi
 	fi
+	sleep 2
 done

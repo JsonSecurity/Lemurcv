@@ -47,14 +47,13 @@ YN="$bord[${cent}Y${bord}/${cent}N${bord}]${excr}"
 
 #info
 autor="${bol}$bord [$W ${info}Json Security${bord} ]"
-script="${bol}$bord [$W ${info}Tauro-IA${bord} ]"
+script="${bol}$bord [$W ${info}OpticSHK${bord} ]"
 
 
 # Variables globales
 IMG_PATH_2=""
 BASEURL="https://generativelanguage.googleapis.com"
 APIKEY=$(cat .APIKEY 2>/dev/null)
-PROMT=$(cat promt.txt 2>/dev/null)
 
 tmp_header_file=upload-header.tmp
 
@@ -65,47 +64,32 @@ fi
 
 banner() {
 	echo -e """$W
-     ....                                      ....                 
-   .,c;.                                        .;c,.               
-  .;xo.                                          .ox;.              
- .'lKx.                                  ...     .xKl'.             
- ',lNXc.                                   ...  .cXNl,'             
- .,;0WKd;.           ..............          ..,d0WK;,'
- .,,:0XK0kdoc::cc:,'...''.....'''..',,:lc::cldk0KXKc,,.
-  .,;:oOXXNWMMMMO:,.   ..........   .,:OMMMMWNXX0d:;,. 
-    .,,;lodxOOkd,..                  ..,dkOOkdol:,'.                
-       .''.',;;,'... .....    ..... ....,;;,''''.'.                 
-       ..';codl:,;:''.  ..    .....'';,,:looc;,'.':.   
-      .,;..',,''.';:c:,. ..  .. .,clc,''',,,'.';,.;;   
-       ..',;;,,'..:oo::,',.  .,,;::oo;..',;;;,'.. .:.  
-     .    ...... .;;......    ......,,. ....... ...;'  
-    ..           .'.   ..      ..   ..'.     .,..'.,,  
-    .'. .     .. .,..  '.      .'  ..,'.     .:'.:.''  
-    .,. .     ... .,,..;'.    .';..;;..,.    'o'.:.'.  
-     ',. .     .'. .';::,......,:::,.  ,'    cd.,c.'.  
-     .;,  .     .,. .;:;;'....':;:;.  .;'   'kl.c;..   
-      .:,  ..    .'...;;;'....';;;'   ,:.  .dO',c...   
-       .::. ....   ....',:;;;;:;'..  ':.  .d0:.c,..    
-        .,l:. ......    .....''.   .;;.  ,k0:.:,.      
-          .;ll:'.............. ..,;;.  'd0x,':'        
-             ':ccllc:;;::::::::;;,..'cdxo,.',.         
-                ..,:cccccc::;;;,,;ccll;.....                        
-                       ......',,,,........
-                                    ..    
-             $autor $script$W    
-
-	"""
+               ..                                  
+               ,;                                  
+               ;c.                                 
+               lk,                                 
+ .,         ,dKWKxc'                              
+ .l'      ,xNMMMMMWXx;.                           
+ .do..;:ckNMMMMMMMMMMNd.                          
+  oXOKWWMMMMMMMMMMMMMMNl                          
+ .o0kKNWMMMMMMMMMMMMMMMx.                         
+ .o:..,oXMMMMMMMMMMMMMMx.                         
+ .,.   cXMMMMMMMMMMMMMWk.                         
+     .:dkxdONMMMMMMMMN00XO:.                       
+  .,cloc,.   'lxO00Odc'..;lddo;.                    
+.';;'.           ..         .,cc:'                  
+                                ..
+ $autor $script$W\n"""
 }
 
 help() {
 	echo -e """\n [+] Usage: 
 
- # All options	
- 	$0 -p <promt>		# promt default promt.txt
- 	$0 -n <name.jpg> 		# name save image
- 	$0 -i <image>		# path image
- 	$0 -d <url>			# download image
- 	$0 -s 			# silent mode"""
+ $0 -p <promt>	# promt
+ $0 -n <name.jpg> 	# name save image
+ $0 -i <image>	# path image
+ $0 -d <url>		# download image
+ $0 -s 		# silent mode"""
 }
 
 verify() {
@@ -135,6 +119,7 @@ uploadFile() {
 	rm "${tmp_header_file}"
 
 	#echo $upload_url
+	#echo -e "\n\n $MIME_TYPE\n\n"
 }
 
 fileUploads() {
@@ -155,12 +140,14 @@ response() {
 	    "parts": [
 	      {"text": "%s"},
 	      {"file_data": {
-	        "mime_type": "image/jpeg",
+	        "mime_type": "%s",
 	        "file_uri": %s
 	      }}
 	    ]
 	  }]
-	}' "$PROMT" "$file_uri")
+	}' "$PROMT" "$MIME_TYPE" "$file_uri")
+
+	#echo $json_data | jq
 	
 	curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=$APIKEY" \
 	    -H "Content-Type: application/json" \
@@ -173,7 +160,8 @@ response() {
 	if [[ $SILENT ]];then
 		text_response=$(jq ".candidates[].content.parts[].text" data/response.json \
 			| sed 's!\\n! !g' | sed 's!*!!g' \
-			| sed 's!"!!g' | sed 's!\\!!g')
+			| sed 's!"!!g' | sed 's!\\!!g' \
+			| tr -d '`')
 	else
 		text_response=$(jq ".candidates[].content.parts[].text" data/response.json \
 	        | sed 's/^ *"//; s/" *$//' \
@@ -199,6 +187,10 @@ downloadImage() {
 	if [[ ! -n $NAME_IMG ]];then
 		NAME_IMG=$(($RANDOM % 1000000))
 		NAME_IMG="$NAME_IMG.jpg"
+	fi
+
+	if [[ ! -d images ]];then
+		mkdir images
 	fi
 
 	wget $URL_IMG -O $NAME_IMG &>/dev/null
@@ -230,7 +222,7 @@ verifyOptions() {
 	DISPLAY_NAME=TEXT
 }
 
-tauroIA() {
+opticshk() {
 	verifyOptions
 
 	banner
@@ -273,5 +265,5 @@ done
 if [[ $SILENT ]];then
 	silentTauroIA
 else
-	tauroIA
+	opticshk
 fi
