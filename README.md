@@ -36,3 +36,13 @@ nano .APIKEY
 ```
 ./lemurcv.sh
 ```
+
+```
+[!] Usage:
+
+ ./lemurcv.sh -p <text>     # promt opticai *
+ ./lemurcv.sh -g <text>     # promt gemini
+
+ ./lemurcv.sh -d <path>     # dir images *
+ ./lemurcv.sh -l            # loop mode
+```
