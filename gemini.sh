@@ -1,15 +1,14 @@
 #!/bin/bash
 
-#configure yout path absolute
 APIKEY=$(cat ".APIKEY" 2>/dev/null)
 
 if [[ ! -n $APIKEY ]];then
-	echo -e "\n[!] .APIKEY not found"
+	echo -e "\n[!] .APIKEY not found\n"
 	exit 1
 fi
 
 if [[ ! $1 ]];then
-	echo -e "\n[!] Promt error"
+	echo -e "\n[!] Promt error\n"
 	exit 1
 fi
 
