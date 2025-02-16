@@ -22,12 +22,10 @@ rP="\e[45m"
 rC="\e[46m"
 rL="\e[47m"
 
-#mas
 bol="${W}\033[1m"
 cur="\033[3m"
 sub="\033[4m"
 
-#salidas/entradas
 cent=$R
 bord=$N
 excr=$W
