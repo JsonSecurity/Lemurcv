@@ -34,6 +34,7 @@ ver=$(cat data/request.txt | awk -F"\"text\":" '{print $2}' | tr -d '\n' \
 	        | sed 's!'"$c"'m\\n!0m\\n!g' \
 	        | sed 's!'"$c"'m !0m !g' \
 	        | sed 's!\\n\*!\\n -!g' \
-	        | sed 's!\\"!"!g')
+	        | sed 's!\\"!"!g' \
+     		| sed 's!  \*  ! \\t- !g')
 
 echo -e $ver
